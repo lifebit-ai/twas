@@ -1,23 +1,47 @@
-FROM continuumio/miniconda3@sha256:a2e6aa4cd0b6dd696ae9e3e5732943250a977ab3a42b2fe5fb7ef0c19d2d9f16
-LABEL description="Dockerfile containing all the requirements for the report of - " \
-      author="your_email@website.domain"
+################## BASE IMAGE ######################
 
-ARG ENV_NAME="base"
+FROM ubuntu@sha256:cc4755a9f2f76ca73055da11f1bdc01d65ce79202a68b041c67c32770c71954b
+# ubuntu:xenial-20200706  amd64
 
-RUN apk add --no-cache bash=5.0.17-r0 procps=3.3.16-r0 libxt-dev=1.2.0-r0
+################## METADATA ######################
+LABEL software="bcftools" \
+      version="1.10" \
+      software.version="1.10.2-105-g7cd83b7" \
+      about.home="https://github.com/samtools/bcftools" \
+      maintainer="Vladyslav Dembrovskyi <vlad@lifebit.ai>"/
 
-COPY environment.yml /
-RUN conda env update -n ${ENV_NAME} -f environment.yml && conda clean -a
+################## INSTALLATION ######################
+USER root
+
+RUN apt-get update && \
+    apt-get install -y \
+              build-essential \
+              git \
+              autoconf \
+              zlib1g-dev \
+              libbz2-dev \
+              liblzma-dev \
+              libcurl4-gnutls-dev \
+              libssl-dev \
+              libgsl0-dev \
+              libperl-dev \
+              procps \
+              curl \
+              jq
+#RUN conda env update -n ${ENV_NAME} -f environment.yml && conda clean -a
 
 # Add conda installation dir to PATH (instead of doing 'conda activate')
-ENV PATH /opt/conda/envs/${ENV_NAME}/bin:$PATH
+#ENV PATH /opt/conda/envs/${ENV_NAME}/bin:$PATH
 
 # Dump the details of the installed packages to a file for posterity
-RUN conda env export --name ${ENV_NAME} > ${ENV_NAME}_exported.yml
+#RUN conda env export --name ${ENV_NAME} > ${ENV_NAME}_exported.yml
 
 # Initialise bash for conda
-RUN conda init bash
+#RUN conda init bash
 
+RUN git clone https://github.com/corbinq/GAMBIT.git
+RUN chmod +x GAMBIT/bin/GAMBIT
+ENV PATH="$PATH:GAMBIT/bin/"
 # Copy additional scripts
 ## bin/report/ files will be flatly copied into bin/ (no report folder)
 RUN mkdir /opt/bin/

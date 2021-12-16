@@ -30,47 +30,48 @@ if (params.help) {
 projectDir = workflow.projectDir
 ch_run_sh_script = Channel.fromPath("${projectDir}/bin/run.sh")
 
-// Define Channels from input
-Channel
-    .fromPath(params.input)
-    .ifEmpty { exit 1, "Cannot find input file : ${params.input}" }
-    .splitCsv(skip:1)
-    .map {sample_name, file_path -> [ sample_name, file_path ] }
-    .set { ch_input }
+
+if (params.gwas_summary_statistics){
+    Channel
+    .fromPath("${params.gwas_summary_statistics}")
+    .ifEmpty { exit 1, "GWAS summary statistics file not found: ${params.gwas_summary_statistics}" }
+    .map {gwas_sumstats -> [ gwas_sumstats, gwas_sumstats+".tbi" ] }
+    .set { ch_gwas_sumstats }
+}
+
+
 
 // Define Process
-process step_1 {
-    tag "$sample_name"
+process ptwas_scan {
+    tag "ptwas_scan"
     label 'low_memory'
     publishDir "${params.outdir}", mode: 'copy'
 
     input:
-    set val(sample_name), file(input_file) from ch_input
-    file(run_sh_script) from ch_run_sh_script
+    set file(vcf_sumstats), file(vcf_sumstats_index) from ch_gwas_sumstats
     
     output:
     file "input_file_head.txt" into ch_out
 
     script:
     """
-    run.sh
-    head $input_file > input_file_head.txt
+  echo "hello" > input_file_head.txt
     """
   }
 
-process report {
-    publishDir "${params.outdir}/MultiQC", mode: 'copy'
+// process report {
+//     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
-    input:
-    file (table) from ch_out
+//     input:
+//     file (table) from ch_out
     
-    output:
-    file "multiqc_report.html" into ch_multiqc_report
+//     output:
+//     file "multiqc_report.html" into ch_multiqc_report
 
-    script:
-    """
-    cp -r ${params.report_dir}/* .
-    Rscript -e "rmarkdown::render('report.Rmd',params = list(res_table='$table'))"
-    mv report.html multiqc_report.html
-    """
-}
+//     script:
+//     """
+//     cp -r ${params.report_dir}/* .
+//     Rscript -e "rmarkdown::render('report.Rmd',params = list(res_table='$table'))"
+//     mv report.html multiqc_report.html
+//     """
+// }
