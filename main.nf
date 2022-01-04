@@ -4,10 +4,10 @@ def helpMessage() {
     log.info """
     Usage:
     The typical command for running the pipeline is as follows:
-    nextflow run main.nf --bams sample.bam [Options]
+    nextflow run main.nf --gwas_summary_statistics gwas_summary.csv [Options]
     
     Inputs Options:
-    --input         Input file
+    --gwas_summary_statistics        Path to input GWAS summary statistics file.
 
     Resource Options:
     --max_cpus      Maximum number of CPUs (int)
@@ -59,7 +59,6 @@ if (params.eqtl_weights){
 // Define Process
 process ptwas_scan {
     tag "ptwas_scan"
-    label 'low_memory'
     publishDir "${params.outdir}", mode: 'copy'
 
     input:
@@ -68,14 +67,13 @@ process ptwas_scan {
     file(eqtl_weights) from ch_eqtl_weights
     
     output:
-    file "input_file_head.txt" into ch_out
+    set file("*stratified_out.txt"), file("*summary_out.txt") into ch_gambit_output
 
     script:
     """
     tar xvzf ${ld_reference_panel}
     tabix -p vcf -f ${eqtl_weights}
     ${params.gambit_exec_path} --gwas ${vcf_sumstats} --betas ${eqtl_weights} --ldref G1K_EUR_3V5/chr*.vcf.gz --ldref-only 
-    echo "hello" > input_file_head.txt
     """
   }
 
