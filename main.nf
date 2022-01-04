@@ -35,7 +35,6 @@ if (params.gwas_summary_statistics){
     Channel
     .fromPath("${params.gwas_summary_statistics}")
     .ifEmpty { exit 1, "GWAS summary statistics file not found: ${params.gwas_summary_statistics}" }
-    .map {gwas_sumstats -> [ gwas_sumstats, gwas_sumstats+".tbi" ] }
     .set { ch_gwas_sumstats }
 }
 
@@ -73,6 +72,7 @@ process ptwas_scan {
     """
     tar xvzf ${ld_reference_panel}
     tabix -p vcf -f ${eqtl_weights}
+    tabix -p vcf -f ${vcf_sumstats}
     ${params.gambit_exec_path} --gwas ${vcf_sumstats} --betas ${eqtl_weights} --ldref G1K_EUR_3V5/chr*.vcf.gz --ldref-only 
     """
   }
