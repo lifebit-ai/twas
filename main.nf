@@ -47,6 +47,13 @@ if (params.ld_reference_panel){
     .set { ch_ld_reference }
 }
 
+if (params.eqtl_weights){
+    Channel
+    .fromPath("${params.eqtl_weights}")
+    .ifEmpty { exit 1, "File with eQTL weights not found: ${params.eqtl_weights}" }
+    .set { ch_eqtl_weights }
+}
+
 
 
 // Define Process
@@ -57,14 +64,17 @@ process ptwas_scan {
 
     input:
     set file(vcf_sumstats), file(vcf_sumstats_index) from ch_gwas_sumstats
-    set file(ld_reference_panel) from ch_ld_reference
+    file(ld_reference_panel) from ch_ld_reference
+    file(eqtl_weights) from ch_eqtl_weights
     
     output:
     file "input_file_head.txt" into ch_out
 
     script:
     """
-    tar zvf ${ld_reference_panel}
+    tar xvzf ${ld_reference_panel}
+    tabix -p vcf -f ${eqtl_weights}
+    ${params.gambit_exec_path} --gwas ${vcf_sumstats} --betas ${eqtl_weights} --ldref G1K_EUR_3V5/chr*.vcf.gz --ldref-only 
     echo "hello" > input_file_head.txt
     """
   }

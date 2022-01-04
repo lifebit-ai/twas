@@ -27,6 +27,7 @@ RUN apt-get update && \
               libperl-dev \
               procps \
               curl \
+              tabix \
               jq
 #RUN conda env update -n ${ENV_NAME} -f environment.yml && conda clean -a
 
@@ -47,4 +48,6 @@ ENV PATH="$PATH:GAMBIT/bin/"
 RUN mkdir /opt/bin/
 COPY bin/* /opt/bin/
 RUN chmod +x /opt/bin/*
-ENV PATH="$PATH:/opt/bin/"
+#ENV PATH="$PATH:/opt/bin/"
+
+ENTRYPOINT ["bash"]
