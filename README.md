@@ -13,7 +13,7 @@ Required inputs are:
 
 ## Optional inputs
 
-- **PTWAS weights files**: used by PTWAS scan procedure to construct composite IVs, also known as the eQTL weights for burden test. Pre-computed weights file from 49 tissues in the GTEx project are used by default.
+- **eqtl_weights**: used by PTWAS scan procedure to construct composite IVs, also known as the eQTL weights for burden test. Pre-computed weights file from 49 tissues in the GTEx project are used by default.
 
 
 ## Resources
