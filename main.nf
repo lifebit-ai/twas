@@ -40,6 +40,14 @@ if (params.gwas_summary_statistics){
 }
 
 
+if (params.ld_reference_panel){
+    Channel
+    .fromPath("${params.ld_reference_panel}")
+    .ifEmpty { exit 1, "File with LD reference panel not found: ${params.ld_reference_panel}" }
+    .set { ch_ld_reference }
+}
+
+
 
 // Define Process
 process ptwas_scan {
@@ -49,13 +57,15 @@ process ptwas_scan {
 
     input:
     set file(vcf_sumstats), file(vcf_sumstats_index) from ch_gwas_sumstats
+    set file(ld_reference_panel) from ch_ld_reference
     
     output:
     file "input_file_head.txt" into ch_out
 
     script:
     """
-  echo "hello" > input_file_head.txt
+    tar zvf ${ld_reference_panel}
+    echo "hello" > input_file_head.txt
     """
   }
 
