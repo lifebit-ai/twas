@@ -8,7 +8,8 @@ def helpMessage() {
     
     Inputs Options:
     --gwas_summary_statistics        Path to input GWAS summary statistics file.
-
+    --ld_reference_panel             Path to LD reference panel.
+    
     Resource Options:
     --max_cpus      Maximum number of CPUs (int)
                     (default: $params.max_cpus)  
