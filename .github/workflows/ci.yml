@@ -1,4 +1,4 @@
-name: tests for bi-twas-nf
+name: tests for twas
 on:
   pull_request:
     types: [review_requested, ready_for_review]
