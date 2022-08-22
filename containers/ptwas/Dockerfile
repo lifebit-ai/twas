@@ -29,11 +29,6 @@ RUN apt-get update && \
 RUN git clone https://github.com/corbinq/GAMBIT.git
 RUN chmod +x GAMBIT/bin/GAMBIT
 ENV PATH="$PATH:GAMBIT/bin/"
-# Copy additional scripts
-## bin/report/ files will be flatly copied into bin/ (no report folder)
-RUN mkdir /opt/bin/
-COPY bin/* /opt/bin/
-RUN chmod +x /opt/bin/*
-ENV PATH="$PATH:/opt/bin/"
 
-ENTRYPOINT ["bash"]
+
+ENTRYPOINT []
