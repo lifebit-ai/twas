@@ -1,20 +1,46 @@
-name: CI test
-# This workflow is triggered on pushes and PRs to the repository.
-on: [push, pull_request]
-
+name: tests for twas
+on:
+  pull_request:
+    types: [review_requested, ready_for_review]
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
 jobs:
-  test:
+  docker:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         nxf_ver: ['20.01.0', '']
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3.0.2
       - name: Install Nextflow
         run: |
           export NXF_VER=${{ matrix.nxf_ver }}
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Basic workflow tests
+      - name: Run TWAS with PTWAS (GWAS VCF input)
         run: |
-          nextflow run ${GITHUB_WORKSPACE} --config conf/test.config
+          export NXF_DEFAULT_DSL=1
+          nextflow run ${GITHUB_WORKSPACE} -profile test_small_vcf,docker
+  singularity:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        singularity_version: ['3.6.4']
+        nxf_ver: ['20.01.0']
+    steps:
+      - uses: actions/checkout@v3.0.2
+      - uses: eWaterCycle/setup-singularity@v7
+        with:
+          singularity-version: ${{ matrix.singularity_version }}
+      - name: Install Nextflow
+        run: |
+          export NXF_VER=${{ matrix.nxf_ver }}
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Test PTWAS (singularity, GWAS VCF input)
+        run: |
+          export NXF_DEFAULT_DSL=1
+          nextflow run ${GITHUB_WORKSPACE} -profile test_small_vcf,singularity
